@@ -21,9 +21,9 @@ static bool shouldSaveConfig = false;
 static bool forceConfig = false;
 
 // MQTT Broker
-static char mqtt_broker[16] = "192.168.1.190";
-static char mqtt_user[20] = "mqtt-user";
-static char mqtt_pass[20] = "mqtt-user";
+static char mqtt_broker[16];
+static char mqtt_user[20];
+static char mqtt_pass[20];
 static int mqtt_port = 1883;
 
 static WiFiClient espClient;
