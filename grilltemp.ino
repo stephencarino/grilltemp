@@ -13,6 +13,7 @@ MAX31865 example
 #include <ArduinoJson.h>
 #include <FS.h>
 #include <SPIFFS.h>
+#include <fauxmoESP.h>
 
 // json
 #define JSON_CONFIG_FILE "/test_config.json"
@@ -28,6 +29,7 @@ static int mqtt_port = 1883;
 
 static WiFiClient espClient;
 static PubSubClient mqttClient(espClient);
+static fauxmoESP fauxmo;
 
 #define numRtdSensors 2
 // rtdSensors[1]
@@ -174,7 +176,7 @@ void mqttConnect()
     {
         String client_id = "esp32-client-";
         client_id += String(WiFi.macAddress());
-        Serial.printf("The client %s is attempting to connect to the public MQTT broker\n", client_id.c_str());
+        Serial.printf("The client %s is attempting to connect to the MQTT broker\n", client_id.c_str());
         if (mqttClient.connect(client_id.c_str(), mqtt_user, mqtt_pass))
         {
             Serial.println("Connected to the MQTT broker");
@@ -219,13 +221,19 @@ void setup()
     Serial.println("Adafruit MAX31865 PT100 Sensor Test!");
     pinMode(TRIGGER_PIN, INPUT_PULLUP);
 
+    // connecting to a mqtt broker
+    mqttClient.setServer(mqtt_broker, mqtt_port);
+
+    // By default, fauxmoESP creates it's own webserver on the defined port
+    // The TCP port must be 80 for gen3 devices (default is 1901)
+    // This has to be done before the call to enable()
+    fauxmo.createServer(true); // not needed, this is the default value
+    fauxmo.setPort(80);        // This is required for gen3 devices
+
     for (int i = 0; i < numRtdSensors; i++)
     {
         rtdSensors[i].begin();
     }
-
-    // connecting to a mqtt broker
-    mqttClient.setServer(mqtt_broker, mqtt_port);
 }
 
 void setupWifi()
